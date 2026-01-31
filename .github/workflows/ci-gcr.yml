@@ -63,4 +63,28 @@ jobs:
       - name: Push Image
         run: |
           docker push \
-            ${{ needs.terraform.outputs.registry_url }}/patient-service:latest      
+            ${{ needs.terraform.outputs.registry_url }}/patient-service:latest   
+   deploy:
+    name: Deploy to GKE
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials \
+            ${{ vars.GKE_CLUSTER }} \
+            --zone ${{ vars.GKE_ZONE }} \
+            --project ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Deploy Patient Service
+        run: |
+          sed "s|IMAGE_PLACEHOLDER|${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/patient-service:${{ github.sha }}|g" \
+          k8s/patient-deployment.yaml | kubectl apply -f -
