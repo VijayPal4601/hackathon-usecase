@@ -64,7 +64,7 @@ jobs:
         run: |
           docker push \
             ${{ needs.terraform.outputs.registry_url }}/patient-service:latest   
-   deploy:
+  deploy:
     name: Deploy to GKE
     needs: build
     runs-on: ubuntu-latest
