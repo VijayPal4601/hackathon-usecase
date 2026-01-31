@@ -38,3 +38,29 @@ jobs:
       working-directory: terraform
       run: |
         echo "registry=$(terraform output -raw registry_url)" >> $GITHUB_OUTPUT
+        
+  build:
+    needs: terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build Image
+        run: |
+          docker build \
+            -t ${{ needs.terraform.outputs.registry_url }}/patient-service:latest \
+            patient-service
+
+      - name: Push Image
+        run: |
+          docker push \
+            ${{ needs.terraform.outputs.registry_url }}/patient-service:latest      
