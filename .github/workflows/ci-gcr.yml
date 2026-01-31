@@ -56,14 +56,15 @@ jobs:
 
       - name: Build Image
         run: |
-          docker build \
-            -t ${{ needs.terraform.outputs.registry_url }}/patient-service:latest \
-            patient-service
+          IMAGE_BASE=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/patient-service
 
-      - name: Push Image
-        run: |
-          docker push \
-            ${{ needs.terraform.outputs.registry_url }}/patient-service:latest   
+          docker build \
+            -t $IMAGE_BASE:${{ github.sha }} \
+            -t $IMAGE_BASE:latest \
+            patient-service
+      
+          docker push $IMAGE_BASE:${{ github.sha }}
+          docker push $IMAGE_BASE:latest   
   deploy:
     name: Deploy to GKE
     needs: build
