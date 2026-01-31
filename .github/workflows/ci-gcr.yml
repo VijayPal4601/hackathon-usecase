@@ -31,7 +31,7 @@ jobs:
       working-directory: terraform
       run: |
         terraform apply -auto-approve \
-          -var="project_id=${{ secrets.GCP_PROJECT_ID }}"
+          -var="project_id=${{ vars.GCP_PROJECT_ID }}"
 
     - name: Terraform Output
       id: tfout
