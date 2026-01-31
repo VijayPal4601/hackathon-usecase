@@ -5,3 +5,11 @@ variable "region" {
 variable "repo_name" {
   default = "hackathon-repo"
 }
+
+variable "zone" {
+  default = "us-central1-a"
+}
+
+variable "gke_cluster_name" {
+  default = "hackathon-gke"
+}
