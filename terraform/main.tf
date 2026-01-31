@@ -18,10 +18,6 @@ resource "google_project_service" "gke" {
   service = "container.googleapis.com"
 }
 
-resource "google_project_service" "artifactregistry" {
-  service = "artifactregistry.googleapis.com"
-}
-
 resource "google_container_cluster" "gke" {
   name     = var.gke_cluster_name
   location = var.zone
