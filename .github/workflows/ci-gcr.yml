@@ -76,10 +76,11 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      - name: Install gke-gcloud-auth-plugin
-        run: |
-           sudo apt-get update
-           sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin    
+          
+      - name: Setup gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: gke-gcloud-auth-plugin    
 
       - name: Get GKE credentials
         run: |
