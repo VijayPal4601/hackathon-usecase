@@ -56,15 +56,25 @@ jobs:
 
       - name: Build Image
         run: |
-          IMAGE_BASE=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/patient-service
-
+          REGISTRY=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}
+          # ---------------- PATIENT ----------------
           docker build \
-            -t $IMAGE_BASE:${{ github.sha }} \
-            -t $IMAGE_BASE:latest \
+            -t $REGISTRY/patient-service:${{ github.sha }} \
+            -t $REGISTRY/patient-service:latest \
             patient-service
       
-          docker push $IMAGE_BASE:${{ github.sha }}
-          docker push $IMAGE_BASE:latest   
+          docker push $REGISTRY/patient-service:${{ github.sha }}
+          docker push $REGISTRY/patient-service:latest
+      
+      
+          # ---------------- ORDER ----------------
+          docker build \
+            -t $REGISTRY/order-service:${{ github.sha }} \
+            -t $REGISTRY/order-service:latest \
+            order-service
+      
+          docker push $REGISTRY/order-service:${{ github.sha }}
+          docker push $REGISTRY/order-service:latest   
   deploy:
     name: Deploy to GKE
     needs: build
@@ -94,3 +104,8 @@ jobs:
         run: |
           sed "s|IMAGE_PLACEHOLDER|${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/patient-service:${{ github.sha }}|g" \
           k8s/patient-deployment.yaml | kubectl apply -f -
+      
+      - name: Deploy Order Service
+        run: |
+          sed "s|IMAGE_PLACEHOLDER|${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/order-service:${{ github.sha }}|g" \
+          k8s/order-deployment.yaml | kubectl apply -f -   
