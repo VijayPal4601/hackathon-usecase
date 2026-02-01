@@ -74,7 +74,17 @@ jobs:
             order-service
       
           docker push $REGISTRY/order-service:${{ github.sha }}
-          docker push $REGISTRY/order-service:latest   
+          docker push $REGISTRY/order-service:latest
+
+          # ---------------- APPLICATION ----------------
+          docker build \
+            -t $REGISTRY/application-service:${{ github.sha }} \
+            -t $REGISTRY/application-service:latest \
+            application-service
+      
+          docker push $REGISTRY/application-service:${{ github.sha }}
+          docker push $REGISTRY/application-service:latest
+          
   deploy:
     name: Deploy to GKE
     needs: build
@@ -108,4 +118,9 @@ jobs:
       - name: Deploy Order Service
         run: |
           sed "s|IMAGE_PLACEHOLDER|${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/order-service:${{ github.sha }}|g" \
-          k8s/order-deployment.yaml | kubectl apply -f -   
+          k8s/order-deployment.yaml | kubectl apply -f -
+
+      - name: Deploy Application Service
+        run: |
+          sed "s|IMAGE_PLACEHOLDER|${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/application-service:${{ github.sha }}|g" \
+          k8s/application.yaml | kubectl apply -f -
